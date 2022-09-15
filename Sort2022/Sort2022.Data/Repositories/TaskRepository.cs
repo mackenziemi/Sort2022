@@ -25,6 +25,23 @@ namespace Sort2022.Data.Repositories
             return task;
         }
 
+        public async Task<bool> CompleteTask(int id)
+        {
+            var task = await GetById(id);
+            task.IsCompleted = true;
+            _context.Update(task);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteTask(int id)
+        {
+            var task = await GetById(id);
+            _context.Tasks.Remove(task);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<IList<Models.Task>> GetAll()
         {
             return await _context.Tasks.ToListAsync();

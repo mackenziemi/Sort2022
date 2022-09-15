@@ -43,7 +43,6 @@ app.MapGet("/tasks/{id}", async ([FromServices] ITaskRepository repository, int 
     return await repository.GetById(id);
 });
 
-
 app.MapPost("/tasks", async (
     [FromBody] Sort2022.Data.Models.Task task, 
     [FromServices] ITaskRepository repository,
@@ -59,6 +58,43 @@ app.MapPost("/tasks", async (
     {
         response.StatusCode = 500;
         return null;
+    }
+});
+
+app.MapPut("/task/{id}/complete", async (
+    [FromServices] ITaskRepository repository, 
+    int id, 
+    HttpResponse response) =>
+{
+    var result = await repository.CompleteTask(id);
+    if(result)
+    {
+        response.StatusCode = 200;
+        return result;
+    }
+    else
+    {
+        response.StatusCode = 500;
+        return result;
+    }
+
+});
+
+app.MapDelete("/tasks/{id}", async (
+    [FromServices] ITaskRepository repository, 
+    int id,
+    HttpResponse response) =>
+{
+    var result = await repository.DeleteTask(id);
+    if(result)
+    {
+        response.StatusCode = 200;
+        return result;
+    }
+    else
+    {
+        response.StatusCode = 500;
+        return result;
     }
 });
 

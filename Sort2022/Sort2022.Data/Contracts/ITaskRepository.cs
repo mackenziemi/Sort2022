@@ -13,5 +13,9 @@ namespace Sort2022.Data.Contracts
         Task<Models.Task> GetById(int id);
 
         Task<Models.Task> AddTask(Models.Task task);
+
+        Task<bool> CompleteTask(int id);
+
+        Task<bool> DeleteTask(int id);
     }
 }
