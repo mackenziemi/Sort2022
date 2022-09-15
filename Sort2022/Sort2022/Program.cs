@@ -12,10 +12,15 @@ builder.Services.AddDbContext<sort2022Context>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultDatabase"));
 });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI();
 
 
 app.MapGet("/", () => "Welcome to SORT 2022");
