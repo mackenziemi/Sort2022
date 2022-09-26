@@ -110,7 +110,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
-app.MapGet("/", () => "Welcome to SORT 2022");
+app.MapGet("/", () => "Welcome to SORT 2022")
+    .WithTags("Simple Test").WithTags("Canary");
 
 app.MapPost("/login",
     [AllowAnonymous] async ([FromBody] User user,
@@ -142,17 +143,17 @@ app.MapPost("/login",
 app.MapGet("/authorizedResource", [Authorize] () => "Action Succeeded")
     .WithName("Authorized").WithTags("Accounts").RequireAuthorization();
 
-app.MapGet("/tasks", async ([FromServices] ITaskRepository repository) =>
+app.MapGet("/tasks", [Authorize]  async ([FromServices] ITaskRepository repository) =>
 {
     return await repository.GetAll();
-});
+}).WithName("Get all tasks").WithTags("Tasks").RequireAuthorization();
 
-app.MapGet("/tasks/{id}", async ([FromServices] ITaskRepository repository, int id) =>
+app.MapGet("/tasks/{id}", [Authorize] async ([FromServices] ITaskRepository repository, int id) =>
 {
     return await repository.GetById(id);
-});
+}).WithName("Get task by Id").WithTags("Tasks").RequireAuthorization();
 
-app.MapPost("/tasks", async (
+app.MapPost("/tasks", [Authorize] async (
     [FromBody] Sort2022.Data.Models.Task task, 
     ITaskRepository repository,
     HttpResponse response) =>
@@ -168,9 +169,9 @@ app.MapPost("/tasks", async (
         response.StatusCode = 500;
         return null;
     }
-});
+}).WithName("Add new task").WithTags("Tasks").RequireAuthorization();
 
-app.MapPut("/task/{id}/complete", async (
+app.MapPut("/task/{id}/complete", [Authorize] async (
     [FromServices] ITaskRepository repository, 
     int id, 
     HttpResponse response) =>
@@ -186,10 +187,9 @@ app.MapPut("/task/{id}/complete", async (
         response.StatusCode = 500;
         return result;
     }
+}).WithName("Update task").WithTags("Tasks").RequireAuthorization();
 
-});
-
-app.MapDelete("/tasks/{id}", async (
+app.MapDelete("/tasks/{id}",  [Authorize] async (
     [FromServices] ITaskRepository repository, 
     int id,
     HttpResponse response) =>
@@ -205,7 +205,7 @@ app.MapDelete("/tasks/{id}", async (
         response.StatusCode = 500;
         return result;
     }
-});
+}).WithName("Remove tasks").WithTags("Tasks").RequireAuthorization();
 
 
 
