@@ -1,15 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Sort2022;
 using Sort2022.Data;
-using Sort2022.Data.Contracts;
-using Sort2022.Data.Repositories;
-using Sort2022.Interfaces;
-using Sort2022.Models;
-using Sort2022.Services;
+using Sort2022.Routes;
 using System.Text;
 using System.Text.Json;
 
@@ -44,9 +39,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddScoped<ITaskRepository, TaskRepository>();
-builder.Services.AddSingleton<IUserRepositoryService, UserRepositoryService>();
-builder.Services.AddSingleton<ITokenService, TokenService>();
+DependencyRegistration.Register(builder);
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(o =>
@@ -109,106 +102,9 @@ app.UseExceptionHandler("/error");
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-app.MapGet("/", () => "Welcome to SORT 2022")
-    .WithTags("Simple Test").WithTags("Canary");
-
-app.MapPost("/login",
-    [AllowAnonymous] async ([FromBody] User user,
-        [FromServices] ITokenService tokenService,
-        [FromServices] IUserRepositoryService userRepositoryService,
-        HttpResponse response) =>
-{
-    var verifiedUser = userRepositoryService.GetUser(user);
-    if(verifiedUser != null)
-    {
-        var token = tokenService.BuildToken(
-            builder.Configuration["Jwt:Key"],
-            builder.Configuration["Jwt:Issuer"],
-            builder.Configuration["Jwt:Audience"],
-            verifiedUser
-            );
-
-        response.StatusCode = 200;
-        await response.WriteAsJsonAsync(new { token = token });
-        return;
-    }
-    else
-    {
-        response.StatusCode = 401;
-        return;
-    }
-}).WithName("Login").WithTags("Accounts");
-
-app.MapGet("/authorizedResource", [Authorize] () => "Action Succeeded")
-    .WithName("Authorized").WithTags("Accounts").RequireAuthorization();
-
-app.MapGet("/tasks", [Authorize]  async ([FromServices] ITaskRepository repository) =>
-{
-    return await repository.GetAll();
-}).WithName("Get all tasks").WithTags("Tasks").RequireAuthorization();
-
-app.MapGet("/tasks/{id}", [Authorize] async ([FromServices] ITaskRepository repository, int id) =>
-{
-    return await repository.GetById(id);
-}).WithName("Get task by Id").WithTags("Tasks").RequireAuthorization();
-
-app.MapPost("/tasks", [Authorize] async (
-    [FromBody] Sort2022.Data.Models.Task task, 
-    ITaskRepository repository,
-    HttpResponse response) =>
-{
-    var result = await repository.AddTask(task);
-    if ( result != null )
-    {
-        response.StatusCode = 201;
-        return task;
-    }
-    else
-    {
-        response.StatusCode = 500;
-        return null;
-    }
-}).WithName("Add new task").WithTags("Tasks").RequireAuthorization();
-
-app.MapPut("/task/{id}/complete", [Authorize] async (
-    [FromServices] ITaskRepository repository, 
-    int id, 
-    HttpResponse response) =>
-{
-    var result = await repository.CompleteTask(id);
-    if(result)
-    {
-        response.StatusCode = 200;
-        return result;
-    }
-    else
-    {
-        response.StatusCode = 500;
-        return result;
-    }
-}).WithName("Update task").WithTags("Tasks").RequireAuthorization();
-
-app.MapDelete("/tasks/{id}",  [Authorize] async (
-    [FromServices] ITaskRepository repository, 
-    int id,
-    HttpResponse response) =>
-{
-    var result = await repository.DeleteTask(id);
-    if(result)
-    {
-        response.StatusCode = 200;
-        return result;
-    }
-    else
-    {
-        response.StatusCode = 500;
-        return result;
-    }
-}).WithName("Remove tasks").WithTags("Tasks").RequireAuthorization();
-
-
-
+TestRoutes.RegisterRoutes(app);
+AccountRoutes.RegisterRoutes(app, builder);
+TaskRoutes.RegisterRoutes(app);
 
 app.Urls.Add("http://localhost:5757");
 
