@@ -11,12 +11,14 @@ namespace Sort2022.Routes
             app.MapGet("/tasks", [Authorize] async ([FromServices] ITaskRepository repository) =>
             {
                 return await repository.GetAll();
-            }).WithName("Get all tasks").WithTags("Tasks").RequireAuthorization();
+            })
+                .WithName("Get all tasks").WithTags("Tasks").RequireAuthorization();
 
             app.MapGet("/tasks/{id}", [Authorize] async ([FromServices] ITaskRepository repository, int id) =>
             {
                 return await repository.GetById(id);
-            }).WithName("Get task by Id").WithTags("Tasks").RequireAuthorization();
+            })
+                .WithName("Get task by Id").WithTags("Tasks").RequireAuthorization();
 
             app.MapPost("/tasks", [Authorize] async (
                 [FromBody] Sort2022.Data.Models.Task task,

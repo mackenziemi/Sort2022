@@ -25,7 +25,9 @@ namespace Sort2022.Services
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
-            var tokenDescriptor = new JwtSecurityToken(issuer, audience, claims, expires: DateTime.Now.Add(ExpiryDuration), signingCredentials: credentials);
+            var tokenDescriptor = new JwtSecurityToken(issuer, audience, claims, 
+                expires: DateTime.Now.Add(ExpiryDuration), 
+                signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
     }

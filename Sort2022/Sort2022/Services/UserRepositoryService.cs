@@ -18,7 +18,8 @@ namespace Sort2022.Services
 
         public User GetUser(User user)
         {
-            return _users.FirstOrDefault(x => string.Equals(user.Username, x.Username) && string.Equals(user.Password, x.Password));
+            return _users.FirstOrDefault(x => string.Equals(user.Username, x.Username) 
+                && string.Equals(user.Password, x.Password));
         }
     }
 }
